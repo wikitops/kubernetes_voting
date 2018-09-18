@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ template "namespace" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+    version: {{ .Values.image.tag | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        release: {{ .Release.Name | quote }}
+        heritage: {{ .Release.Service | quote }}
+        version: {{ .Values.imageTag | quote }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                -  {{ .Release.Name }}-redis
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: postgresql
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ default "Always" .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          env:
+          - name: POSTGRESQL_SERVER
+            value: {{ .Values.postgresql.server | default (printf "%s-postgresql" ( .Release.Name )) | quote }}
+          - name: POSTGRESQL_DATABASE
+            value: {{ .Values.postgresql.database | default (printf "%s" ( .Release.Name )) | quote }}
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-postgresql
+                key: username
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-postgresql
+                key: password
+            livenessProbe:
+              tcpSocket:
+                port: postgresql
+              initialDelaySeconds: 15
+              periodSeconds: 20
+            readinessProbe:
+              tcpSocket:
+                port: postgresql
+              initialDelaySeconds: 5
+              periodSeconds: 10
+            volumeMounts:
+              - mountPath: /var/lib/postgresql
+                name: {{ .Chart.Name }}-data
+          volumes:
+          - name: {{ .Chart.Name }}-data
+            persistentVolumeClaim:
+              claimName: {{ .Chart.Name }}

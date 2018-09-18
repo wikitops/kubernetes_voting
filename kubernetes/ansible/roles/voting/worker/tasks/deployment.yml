@@ -1,0 +1,63 @@
+---
+
+- name: VOTING APP WORKER | Manage Deployment
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ worker_service_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            name: "{{ worker_service_name }}"
+        strategy:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+          type: RollingUpdate
+        template:
+          metadata:
+            labels:
+              name: "{{ worker_service_name }}"
+          spec:
+            containers:
+              - env:
+                  - name: "REDIS_SERVICE_NAME"
+                    value: "redis"
+                  - name: "DB_SERVICE_NAME"
+                    value: "db"
+                  - name: "DB_NAME"
+                    valueFrom:
+                      configMapKeyRef:
+                        name: db
+                        key: database-name
+                  - name: "DB_USERNAME"
+                    valueFrom:
+                      secretKeyRef:
+                        name: db
+                        key: database-user
+                  - name: "DB_PASSWORD"
+                    valueFrom:
+                      secretKeyRef:
+                        name: db
+                        key: database-password
+                image: wikitops/examplevotingapp-worker:1.0
+                imagePullPolicy: Always
+                livenessProbe:
+                  exec:
+                    command:
+                    - ps
+                    - aux
+                    - |
+                    - grep
+                    - worker
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                name: "{{ worker_service_name }}"
+            dnsPolicy: ClusterFirst
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30

@@ -1,0 +1,10 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  labels:
+    app: vote
+  name: vote
+  namespace: voting-app-prd
+spec:
+  lookupPolicy:
+    local: false

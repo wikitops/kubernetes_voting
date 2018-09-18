@@ -1,0 +1,15 @@
+env:
+  option_a: "VIM"
+  option_b: "NANO"
+
+image:
+  repository: wikitops/examplevotingapp-vote
+  tag: 1.0
+
+redis:
+  server: ""
+
+replicaCount: 1
+
+vote:
+  environment: "prd"

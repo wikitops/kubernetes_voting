@@ -1,0 +1,8 @@
+image:
+  repository: redis
+  tag: alpine
+
+replicaCount: 1
+
+redis:
+  environment: "prd"

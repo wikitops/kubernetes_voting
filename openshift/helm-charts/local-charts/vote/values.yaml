@@ -1,0 +1,18 @@
+env:
+  option_a: "VIM"
+  option_b: "NANO"
+
+image:
+  repository: docker-registry.default.svc
+  tag: 5000/voting-app/vote
+
+gitlab:
+  password: reHXFTMTqxecDVDT
+
+redis:
+  server: ""
+
+replicaCount: 1
+
+vote:
+  environment: "prd"

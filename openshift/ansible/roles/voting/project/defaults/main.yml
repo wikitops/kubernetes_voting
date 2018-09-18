@@ -1,0 +1,17 @@
+---
+
+###
+# PROJECT
+###
+
+# Namespace
+app_namespace: voting
+app_description: "Workspace of the Docker example Voting app demo"
+app_display_name: "Voting App"
+
+# Secret
+project_secret:
+  - name: gitlab
+    type: kubernetes.io/basic-auth
+    username: openshift
+    password: rP45EqZS

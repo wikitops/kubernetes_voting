@@ -1,0 +1,22 @@
+---
+
+- name: VOTING APP VOTE | Manage Service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        ports:
+        - name: "{{ item.name }}"
+          nodePort: 31000 # "{{ item.nodePort }}"
+          port: 8080 # "{{ item.port }}"
+          protocol: "{{ item.protocol }}"
+          targetPort: 8080 # "{{ item.targetPort }}"
+        selector:
+          name: "{{ item.name }}"
+        type: "{{ item.type }}"
+  with_items: "{{ vote_services }}"

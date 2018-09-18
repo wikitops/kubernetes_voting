@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for postgresql service of Docker example-voting-app
+name: db
+version: "1.0"

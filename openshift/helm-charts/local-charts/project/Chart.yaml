@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart to manage the namespace of Docker example-voting-app
+name: namespace
+version: "1.0"

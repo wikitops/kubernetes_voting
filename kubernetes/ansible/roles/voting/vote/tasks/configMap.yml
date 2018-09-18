@@ -1,0 +1,15 @@
+---
+
+- name: VOTING APP VOTE | Manage Config Map
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ app_namespace }}"
+      data:
+        option_a: "{{ item.option_a }}"
+        option_b: "{{ item.option_b }}"
+  with_items: "{{ vote_configMap }}"

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ template "namespace" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+    version: {{ .Values.image.tag | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        release: {{ .Release.Name | quote }}
+        heritage: {{ .Release.Service | quote }}
+        version: {{ .Values.imageTag | quote }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                -  {{ .Release.Name }}-postgresql
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: redis
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ default "Always" .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 6379
+              name: redis
+              livenessProbe:
+                tcpSocket:
+                  port: redis
+                initialDelaySeconds: 15
+                periodSeconds: 20
+              readinessProbe:
+                tcpSocket:
+                  port: redis
+                initialDelaySeconds: 5
+                periodSeconds: 20
+          #     volumeMounts:
+          #       - mountPath: /data
+          #         name: {{ .Chart.Name }}-data
+          # volumes:
+          # - name: {{ .Chart.Name }}-data
+          #   persistentVolumeClaim:
+          #     claimName: {{ .Chart.Name }}

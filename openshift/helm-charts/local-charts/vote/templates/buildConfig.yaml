@@ -1,0 +1,54 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ template "namespace" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name  | quote }}
+    heritage: {{ .Release.Service  | quote }}
+    version: {{ .Values.image.tag | quote }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: '{{ template "fullname" . }}:latest'
+  runPolicy: Serial
+  source:
+    contextDir: /sources/{{ template "fullname" . }}
+    git:
+      ref: master
+      uri: 'http://gitlab.lq.ca.treeptik.cloud/developers/voting-app.git'
+    sourceSecret:
+      name: gitlab
+    type: Git
+  strategy:
+    dockerStrategy:
+      env:
+        - name: REDIS_SERVICE_NAME
+          value: redis
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: redis
+        - name: PORT
+          value: "8080"
+        - name: OPTION_A
+          valueFrom:
+            configMapKeyRef:
+              key: option_a
+              name: {{ template "fullname" . }}
+        - name: OPTION_B
+          valueFrom:
+            configMapKeyRef:
+              key: option_b
+              name: {{ template "fullname" . }}
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - type: "GitLab"
+    gitlab:
+      secretReference:
+        name: "gitlab-{{ template "fullname" . }}"
+  - type: "ConfigChange"

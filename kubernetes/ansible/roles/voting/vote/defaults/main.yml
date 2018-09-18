@@ -1,0 +1,30 @@
+---
+
+###
+# VOTING APP - VOTE
+###
+
+# Global
+vote_service_name: vote
+
+# Service
+vote_services:
+  - name: "{{ vote_service_name }}"
+    nodePort: 31000
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    type: NodePort
+
+# HorizontalPodAutoscaler
+vote_horizontalPodAutoscaler:
+  - name: "{{ vote_service_name }}"
+    minReplicas: 1
+    maxReplicas: 5
+    targetAverageUtilization: 80
+
+# ConfigMap
+vote_configMap:
+  - name: "{{ vote_service_name }}"
+    option_a: "KUBERNETES"
+    option_b: "SWARM"

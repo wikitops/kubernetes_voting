@@ -1,0 +1,15 @@
+apiVersion: v1
+description: Helm Chart for Docker example-voting-app
+name: openshift-voting-app
+keywords:
+- treeptik
+- openshift
+- kubernetes
+- example-voting-app
+- docker
+version: "1.0"
+sources:
+- http://gitlab.lq.ca.treeptik.cloud/operations/openshift-voting-app/
+maintainers:
+- name: wikitops
+  email: wikitops5692@gmail.com

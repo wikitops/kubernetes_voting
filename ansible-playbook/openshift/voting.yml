@@ -1,0 +1,6 @@
+---
+
+- name: VOTING APP | Manage deployment on Openshift
+  hosts: voting
+  roles:
+    - voting

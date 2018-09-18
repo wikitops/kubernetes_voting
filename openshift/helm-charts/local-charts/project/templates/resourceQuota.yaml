@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ template "namespace" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+    version: {{ .Release.Version | quote }}
+spec:
+  hard:
+    requests.cpu: 2
+    requests.memory: 2.5Gi
+    limits.cpu: 10
+    limits.memory: 5Gi

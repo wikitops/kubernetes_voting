@@ -1,0 +1,33 @@
+dependencies:
+- name: project
+  version: "1.0"
+  repository: file://local-charts/project
+  tags:
+  - project
+- name: db
+  version: "1.0"
+  repository: file://local-charts/postgresql
+  condition: postgresql.enabled
+  tags:
+  - db
+- name: redis
+  version: "1.0"
+  repository: file://local-charts/redis
+  condition: redis.enabled
+  tags:
+  - redis
+- name: result
+  version: "1.0"
+  repository: file://local-charts/result
+  tags:
+  - result
+- name: vote
+  version: "1.0"
+  repository: file://local-charts/vote
+  tags:
+  - vote
+- name: worker
+  version: "1.0"
+  repository: file://local-charts/worker
+  tags:
+  - worker

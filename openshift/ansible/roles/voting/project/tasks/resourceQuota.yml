@@ -1,0 +1,17 @@
+---
+
+- name: VOTING APP PROJECT | Manage Resource Quotas
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        name: voting
+        namespace: "{{ app_namespace }}"
+      spec:
+        hard:
+          requests.cpu: 2
+          requests.memory: 2.5Gi
+          limits.cpu: 10
+          limits.memory: 5Gi

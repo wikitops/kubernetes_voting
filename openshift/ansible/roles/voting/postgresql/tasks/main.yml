@@ -1,0 +1,16 @@
+---
+
+- name: VOTING APP DATABASE | Manage Service
+  import_tasks: service.yml
+
+- name: VOTING APP DATABASE | Manage NetworkPolicy
+  import_tasks: networkPolicy.yml
+
+- name: VOTING APP DATABASE | Manage Volume persistency
+  import_tasks: persistentVolumeClaim.yml
+
+- name: VOTING APP DATABASE | Manage Secret
+  import_tasks: secret.yml
+
+- name: VOTING APP DATABASE | Manage DeploymentConfig
+  import_tasks: deployment.yml

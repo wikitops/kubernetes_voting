@@ -1,0 +1,16 @@
+---
+
+- name: VOTING APP WORKER | Manage Secret
+  import_tasks: secret.yml
+
+- name: VOTING APP WORKER | Manage Horizontal Pod Autoscaler
+  import_tasks: horizontalPodAutoscaler.yml
+
+- name: VOTING APP WORKER | Manage Image Stream
+  import_tasks: imageStream.yml
+
+- name: VOTING APP WORKER | Manage Build Config
+  import_tasks: buildConfig.yml
+
+- name: VOTING APP WORKER | Manage DeploymentConfig
+  import_tasks: deploymentConfig.yml

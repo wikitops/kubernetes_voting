@@ -1,0 +1,15 @@
+image:
+  repository: wikitops/examplevotingapp-worker
+  tag: 1.0
+
+replicaCount: 1
+
+postgresql:
+  server: ""
+  database: ""
+
+redis:
+  server: ""
+
+worker:
+  environment: "prd"

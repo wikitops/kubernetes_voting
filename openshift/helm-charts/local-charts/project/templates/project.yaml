@@ -1,0 +1,7 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    openshift.io/description: "{{ .Values.project.description }}"
+    openshift.io/display-name: "{{ .Values.project.display_name }}"
+  name: {{ template "namespace" . }}

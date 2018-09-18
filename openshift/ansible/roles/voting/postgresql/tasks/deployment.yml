@@ -1,0 +1,99 @@
+---
+
+- name: VOTING APP DATABASE | Manage DeploymentConfig
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps.openshift.io/v1
+      kind: DeploymentConfig
+      metadata:
+        name: "{{ database_service_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        replicas: 1
+        revisionHistoryLimit: 5
+        selector:
+          name: "{{ database_service_name }}"
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              name: "{{ database_service_name }}"
+          spec:
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                      - redis
+                  topologyKey: "kubernetes.io/hostname"
+            containers:
+              - env:
+                  - name: POSTGRESQL_USER
+                    valueFrom:
+                      secretKeyRef:
+                        key: database-user
+                        name: "{{ database_service_name }}"
+                  - name: POSTGRESQL_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        key: database-password
+                        name: "{{ database_service_name }}"
+                  - name: POSTGRESQL_DATABASE
+                    valueFrom:
+                      secretKeyRef:
+                        key: database-name
+                        name: "{{ database_service_name }}"
+                image: docker-registry.default.svc:5000/openshift/postgresql
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  exec:
+                    command:
+                      - /usr/libexec/check-container
+                      - '--live'
+                  failureThreshold: 3
+                  initialDelaySeconds: 120
+                  periodSeconds: 10
+                  successThreshold: 1
+                  timeoutSeconds: 10
+                name: "{{ database_service_name }}"
+                ports:
+                  - containerPort: 5432
+                    protocol: TCP
+                readinessProbe:
+                  exec:
+                    command:
+                      - /usr/libexec/check-container
+                  failureThreshold: 3
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  successThreshold: 1
+                  timeoutSeconds: 1
+                securityContext:
+                  capabilities: {}
+                  privileged: false
+                volumeMounts:
+                  - mountPath: /var/lib/pgsql/data
+                    name: "{{ database_service_name }}-data"
+            dnsPolicy: ClusterFirst
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30
+            volumes:
+              - name: "{{ database_service_name }}-data"
+                persistentVolumeClaim:
+                  claimName: "{{ database_service_name }}"
+        triggers:
+          - imageChangeParams:
+              automatic: true
+              containerNames:
+                - "{{ database_service_name }}"
+              from:
+                kind: ImageStreamTag
+                name: 'postgresql:9.6'
+                namespace: openshift
+            type: ImageChange
+          - type: ConfigChange

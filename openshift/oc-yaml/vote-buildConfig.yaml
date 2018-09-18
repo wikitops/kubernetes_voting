@@ -1,0 +1,48 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: vote
+  namespace: voting-app-prd
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'vote:latest'
+  runPolicy: Serial
+  source:
+    contextDir: /sources/vote
+    git:
+      ref: master
+      uri: 'http://gitlab.lq.ca.treeptik.cloud/developers/voting-app.git'
+    sourceSecret:
+      name: gitlab-vote
+    type: Git
+  strategy:
+    dockerStrategy:
+      env:
+        - name: REDIS_SERVICE_NAME
+          value: redis
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: redis
+        - name: PORT
+          value: "8080"
+        - name: OPTION_A
+          valueFrom:
+            configMapKeyRef:
+              key: option_a
+              name: vote
+        - name: OPTION_B
+          valueFrom:
+            configMapKeyRef:
+              key: option_b
+              name: vote
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - type: "GitLab"
+    gitlab:
+      secretReference:
+        name: "gitlab-vote"
+  - type: "ConfigChange"

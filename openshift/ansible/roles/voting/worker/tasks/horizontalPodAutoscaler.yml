@@ -1,0 +1,24 @@
+---
+
+- name: VOTING APP WORKER | Manage Horizontal Pod Autoscaling
+  k8s:
+    state: present
+    definition:
+      apiVersion: autoscaling/v2beta1
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: "{{ item.name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        scaleTargetRef:
+          apiVersion: apps/v1
+          kind: Deployment
+          name: "{{ item.name }}"
+        minReplicas: 1 # "{{ item.minReplicas }}"
+        maxReplicas: 5 # "{{ item.maxReplicas }}"
+        metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            targetAverageUtilization: 80 # "{{ item.targetAverageUtilization }}"
+  with_items: "{{ worker_horizontalPodAutoscaler }}"

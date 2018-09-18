@@ -1,0 +1,10 @@
+image:
+  repository: centos/postgresql-96-centos7
+  tag: latest
+
+replicaCount: 1
+
+postgresql:
+  username: voting
+  password: voting
+  environment: "prd"

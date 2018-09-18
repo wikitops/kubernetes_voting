@@ -1,0 +1,32 @@
+---
+
+dependencies:
+
+  # Project
+  - role: voting/project
+    tags: voting-project
+
+  # Database
+  - role: voting/postgresql
+    tags: voting-postgresql
+    when: app_state == 'present'
+
+  # Queue
+  - role: voting/redis
+    tags: voting-redis
+    when: app_state == 'present'
+
+  # Result
+  - role: voting/result
+    tags: voting-result
+    when: app_state == 'present'
+
+  # Vote
+  - role: voting/vote
+    tags: voting-vote
+    when: app_state == 'present'
+
+  # Worker
+  - role: voting/worker
+    tags: voting-worker
+    when: app_state == 'present'

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ template "namespace" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+    version: {{ .Values.image.tag | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configMap.yaml") . | sha256sum }}
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        release: {{ .Release.Name | quote }}
+        heritage: {{ .Release.Service | quote }}
+        version: {{ .Values.imageTag | quote }}
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ .Values.redis.host | default (printf "%s-redis" ( .Release.Name )) }}
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: vote
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ default "Always" .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+              name: vote
+          env:
+          - name: REDIS_HOST
+            value: {{ .Values.redis.server | default (printf "%s-redis" ( .Release.Name )) | quote }}
+          - name: "OPTION_A"
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "fullname" . }}
+                key: option_a
+          - name: "OPTION_B"
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "fullname" . }}
+                key: option_b
+          livenessProbe:
+            httpGet:
+              path: /
+              port: vote
+            initialDelaySeconds: 3
+            periodSeconds: 3

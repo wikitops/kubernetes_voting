@@ -1,0 +1,8 @@
+---
+
+- name: VOTING APP PROJECT | Manage workspace
+  k8s:
+    api_version: project.openshift.io/v1
+    kind: Project
+    name: "{{ app_namespace }}"
+    state: "{{ app_state }}"

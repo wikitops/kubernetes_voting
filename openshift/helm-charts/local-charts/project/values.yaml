@@ -1,0 +1,6 @@
+namespace:
+  environment: "prd"
+
+project:
+  display_name: "Voting App"
+  description: "Workspace of the Docker example Voting app demo"

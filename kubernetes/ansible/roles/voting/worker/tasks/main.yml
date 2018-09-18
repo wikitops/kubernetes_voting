@@ -1,0 +1,7 @@
+---
+
+- name: VOTING APP WORKER | Manage Horizontal Pod Autoscaler
+  import_tasks: horizontalPodAutoscaler.yml
+
+- name: VOTING APP WORKER | Manage Deployment
+  import_tasks: deployment.yml

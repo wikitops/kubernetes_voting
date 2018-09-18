@@ -1,0 +1,15 @@
+image:
+  repository: docker-registry.default.svc
+  tag: 5000/voting-app-prd/result
+
+gitlab:
+  password: JdUTHJjGcNastFwz
+
+replicaCount: 1
+
+postgresql:
+  server: "voting"
+  database: "voting"
+
+result:
+  environment: "prd"

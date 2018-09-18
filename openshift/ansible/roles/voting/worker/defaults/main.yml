@@ -1,0 +1,21 @@
+---
+
+###
+# VOTING APP - WORKER
+###
+
+# Global
+worker_service_name: worker
+
+# HorizontalPodAutoscaler
+worker_horizontalPodAutoscaler:
+  - name: "{{ worker_service_name }}"
+    minReplicas: 1
+    maxReplicas: 5
+    targetAverageUtilization: 80
+
+# Secret
+worker_secret:
+- name: gitlab-worker
+  type: Opaque
+  WebHookSecretKey: QeubURsYMpnmcyKc

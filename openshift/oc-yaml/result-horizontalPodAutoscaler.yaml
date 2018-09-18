@@ -1,0 +1,14 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: result
+  namespace: voting-app-prd
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: DeploymentConfig
+    name: result
+  minReplicas: 1
+  maxReplicas: 5
+  cpuUtilization:
+    targetPercentage: 80

@@ -1,0 +1,83 @@
+---
+
+- name: VOTING APP DATABASE | Manage Deployment
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ database_service_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            name: "{{ database_service_name }}"
+        strategy:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+          type: RollingUpdate
+        template:
+          metadata:
+            labels:
+              name: "{{ database_service_name }}"
+          spec:
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                      - redis
+                  topologyKey: "kubernetes.io/hostname"
+            containers:
+              - env:
+                  - name: "POSTGRESQL_DATABASE"
+                    valueFrom:
+                      configMapKeyRef:
+                        name: "{{ database_service_name }}"
+                        key: database-name
+                  - name: "POSTGRESQL_USER"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "{{ database_service_name }}"
+                        key: database-user
+                  - name: "POSTGRESQL_PASSWORD"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "{{ database_service_name }}"
+                        key: database-password
+                image: centos/postgresql-96-centos7
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  tcpSocket:
+                    port: "{{ database_service_name }}"
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
+                name: "{{ database_service_name }}"
+                ports:
+                  - name: "{{ database_service_name }}"
+                    containerPort: 5432
+                    protocol: TCP
+                readinessProbe:
+                  tcpSocket:
+                    port: "{{ database_service_name }}"
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                securityContext:
+                  capabilities: {}
+                  privileged: false
+                volumeMounts:
+                  - mountPath: /var/lib/postgresql
+                    name: "{{ database_service_name }}-data"
+            dnsPolicy: ClusterFirst
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30
+            volumes:
+              - name: "{{ database_service_name }}-data"
+                persistentVolumeClaim:
+                  claimName: "{{ database_service_name }}"

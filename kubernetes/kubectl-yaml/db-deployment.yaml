@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: voting-app-prd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: db
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: db
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: name
+                operator: In
+                values:
+                - redis
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - env:
+            - name: "POSTGRESQL_DATABASE"
+              valueFrom:
+                configMapKeyRef:
+                  name: db
+                  key: database-name
+            - name: "POSTGRESQL_USER"
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: database-user
+            - name: "POSTGRESQL_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: database-password
+          image: centos/postgresql-96-centos7
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            tcpSocket:
+              port: db
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          name: db
+          ports:
+            - name: db
+              containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: db
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            capabilities: {}
+            privileged: false
+          volumeMounts:
+            - mountPath: /var/lib/postgresql
+              name: db-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db

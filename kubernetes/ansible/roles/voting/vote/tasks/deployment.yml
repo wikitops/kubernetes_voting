@@ -1,0 +1,71 @@
+---
+
+- name: VOTING APP VOTE | Manage Deployment
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ vote_service_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            name: "{{ vote_service_name }}"
+        strategy:
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+          type: RollingUpdate
+        template:
+          metadata:
+            labels:
+              name: "{{ vote_service_name }}"
+          spec:
+            affinity:
+              podAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                      - redis
+                  topologyKey: "kubernetes.io/hostname"
+            containers:
+              - env:
+                  - name: "REDIS_SERVICE_NAME"
+                    valueFrom:
+                      configMapKeyRef:
+                        name: redis
+                        key: database-name
+                  - name: "PORT"
+                    value: "8080"
+                  - name: "OPTION_A"
+                    valueFrom:
+                      configMapKeyRef:
+                        name: "{{ vote_service_name }}"
+                        key: option_a
+                  - name: "OPTION_B"
+                    valueFrom:
+                      configMapKeyRef:
+                        name: "{{ vote_service_name }}"
+                        key: option_b
+                image: wikitops/examplevotingapp-vote:1.0
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: "{{ vote_service_name }}"
+                  initialDelaySeconds: 3
+                  periodSeconds: 3
+                name: "{{ vote_service_name }}"
+                ports:
+                  - containerPort: 8080
+                    name: "{{ vote_service_name }}"
+                    protocol: TCP
+            dnsPolicy: ClusterFirst
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30

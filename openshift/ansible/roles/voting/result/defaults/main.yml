@@ -1,0 +1,30 @@
+---
+
+###
+# VOTING APP - RESULT
+###
+
+# Global
+result_service_name: result
+
+# Service
+result_services:
+  - name: "{{ result_service_name}}"
+    nodePort: 31001
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    type: NodePort
+
+# HorizontalPodAutoscaler
+result_horizontalPodAutoscaler:
+  - name: "{{ result_service_name}}"
+    minReplicas: 1
+    maxReplicas: 5
+    targetAverageUtilization: 80
+
+# Secret
+result_secret:
+  - name: gitlab-result
+    type: Opaque
+    WebHookSecretKey: JdUTHJjGcNastFwz

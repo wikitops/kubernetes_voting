@@ -1,0 +1,11 @@
+image:
+  repository: docker-registry.default.svc
+  tag: 5000/openshift/postgresql
+
+replicaCount: 1
+
+postgresql:
+  database: voting
+  username: voting
+  password: voting
+  environment: "prd"

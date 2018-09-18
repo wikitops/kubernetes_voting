@@ -1,0 +1,16 @@
+---
+
+- name: VOTING APP REDIS | Manage Service
+  import_tasks: service.yml
+
+- name: VOTING APP REDIS | Manage NetworkPolicy
+  import_tasks: networkPolicy.yml
+
+- name: VOTING APP REDIS | Manage Volume persistency
+  import_tasks: persistentVolumeClaim.yml
+
+- name: VOTING APP REDIS | Manage Secret
+  import_tasks: secret.yml
+
+- name: VOTING APP REDIS | Manage Deployment
+  import_tasks: deployment.yml

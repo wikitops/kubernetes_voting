@@ -1,0 +1,93 @@
+---
+
+- name: VOTING APP REDIS | Manage DeploymentConfig
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps.openshift.io/v1
+      kind: DeploymentConfig
+      metadata:
+        name: "{{ redis_service_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        replicas: 1
+        revisionHistoryLimit: 5
+        selector:
+          name: "{{ redis_service_name }}"
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              name: "{{ redis_service_name }}"
+          spec:
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                      - db
+                  topologyKey: "kubernetes.io/hostname"
+            containers:
+              - env:
+                  - name: REDIS_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        key: database-password
+                        name: "{{ redis_service_name }}"
+                image: docker-registry.default.svc:5000/openshift/redis
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  failureThreshold: 3
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  successThreshold: 1
+                  tcpSocket:
+                    port: 6379
+                  timeoutSeconds: 1
+                name: "{{ redis_service_name }}"
+                ports:
+                  - containerPort: 6379
+                    protocol: TCP
+                readinessProbe:
+                  exec:
+                    command:
+                      - /bin/sh
+                      - '-i'
+                      - '-c'
+                      - >-
+                        test "$(redis-cli -h 127.0.0.1 -a $REDIS_PASSWORD ping)" ==
+                        "PONG"
+                  failureThreshold: 3
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  successThreshold: 1
+                  timeoutSeconds: 1
+                securityContext:
+                  capabilities: {}
+                  privileged: false
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+                volumeMounts:
+                  - mountPath: /var/lib/redis/data
+                    name: "{{ redis_service_name }}-data"
+            dnsPolicy: ClusterFirst
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30
+            volumes:
+              - name: "{{ redis_service_name }}-data"
+                persistentVolumeClaim:
+                  claimName: "{{ redis_service_name }}"
+        triggers:
+          - imageChangeParams:
+              automatic: true
+              containerNames:
+                - "{{ redis_service_name }}"
+              from:
+                kind: ImageStreamTag
+                name: 'redis:3.2'
+                namespace: openshift
+            type: ImageChange

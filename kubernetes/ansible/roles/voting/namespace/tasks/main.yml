@@ -1,0 +1,16 @@
+---
+
+- name: VOTING APP NAMESPACE | Manage workspace
+  import_tasks: namespace.yml
+
+- name: VOTING APP NAMESPACE | Manage Limit Range
+  import_tasks: limitRange.yml
+  when: app_state == 'present'
+
+- name: VOTING APP NAMESPACE | Manage Network Policy
+  import_tasks: networkPolicy.yml
+  when: app_state == 'present'
+
+- name: VOTING APP NAMESPACE | Manage Resource Quotas
+  import_tasks: resourceQuota.yml
+  when: app_state == 'present'

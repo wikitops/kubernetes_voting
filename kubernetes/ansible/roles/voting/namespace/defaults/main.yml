@@ -1,0 +1,11 @@
+---
+
+###
+# NAMESPACE
+###
+
+# Namespace
+app_namespace: voting
+
+# Manage installation or uninstallation
+app_state: present

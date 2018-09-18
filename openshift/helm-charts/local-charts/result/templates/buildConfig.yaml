@@ -1,0 +1,56 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ template "namespace" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+    version: {{ .Values.image.tag | quote }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: '{{ template "fullname" . }}:latest'
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: /sources/{{ template "fullname" . }}
+    git:
+      ref: master
+      uri: 'http://gitlab.lq.ca.treeptik.cloud/developers/voting-app.git'
+    sourceSecret:
+      name: gitlab
+    type: Git
+  strategy:
+    dockerStrategy:
+      env:
+        - name: DB_SERVICE_NAME
+          value: {{ .Values.postgresql.server | default (printf "%s-postgresql" ( .Release.Name )) | quote }}
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              key: database-name
+              name: db
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: database-user
+              name: db
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: db
+        - name: PORT
+          value: '8080'
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - type: "GitLab"
+    gitlab:
+      secretReference:
+        name: "gitlab-{{ template "fullname" . }}"
+  - type: "ConfigChange"

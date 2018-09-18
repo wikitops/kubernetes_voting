@@ -1,0 +1,12 @@
+image:
+  repository: wikitops/examplevotingapp-result
+  tag: 1.0
+
+replicaCount: 1
+
+postgresql:
+  server: "voting"
+  database: "voting"
+
+result:
+  environment: "prd"

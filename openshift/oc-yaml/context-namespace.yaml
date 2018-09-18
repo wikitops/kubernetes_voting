@@ -1,0 +1,7 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    openshift.io/description: "Workspace of the Docker example Voting app demo"
+    openshift.io/display-name: "Voting App"
+  name: voting-app-prd

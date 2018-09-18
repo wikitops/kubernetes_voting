@@ -1,0 +1,8 @@
+image:
+  repository: docker-registry.default.svc
+  tag: 5000/openshift/redis
+
+replicaCount: 1
+
+redis:
+  environment: "prd"

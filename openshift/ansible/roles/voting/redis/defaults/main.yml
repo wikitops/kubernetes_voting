@@ -1,0 +1,27 @@
+---
+
+###
+# VOTING APP - REDIS
+###
+
+# Global
+redis_service_name: redis
+
+# Service
+redis_services:
+  - name: "{{ redis_service_name }}"
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+    type: ClusterIP
+
+# Volume
+redis_volumes:
+  - name: "{{ redis_service_name }}"
+    size: 10Gi
+    storageClass: gp2
+
+# Secret
+redis_secret:
+  - name: redis
+    password: "8e9d8xPx"

@@ -1,0 +1,20 @@
+---
+
+###
+## GENERALITIES
+###
+app_name: voting
+app_version: 100
+app_namespace: "{{ app_name }}-v{{ app_version }}"
+
+# Manage installation or uninstallation
+app_state: present
+
+###
+# ENVIRONMENT VARIABLES
+###
+
+# Vote Environment Variables
+vote_env:
+  option_a: SWARM
+  option_b: KUBERNETES

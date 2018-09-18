@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: voting
+  namespace: voting-app-prd
+spec:
+  hard:
+    requests.cpu: 2
+    requests.memory: 2.5Gi
+    limits.cpu: 10
+    limits.memory: 5Gi

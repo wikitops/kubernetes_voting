@@ -1,0 +1,22 @@
+---
+
+- name: VOTING APP RESULT | Manage Secret
+  import_tasks: secret.yml
+
+- name: VOTING APP RESULT | Manage Service
+  import_tasks: service.yml
+
+- name: VOTING APP RESULT | Manage NetworkPolicy
+  import_tasks: networkPolicy.yml
+
+- name: VOTING APP RESULT | Manage Horizontal Pod Autoscaler
+  import_tasks: horizontalPodAutoscaler.yml
+
+- name: VOTING APP RESULT | Manage Image Stream
+  import_tasks: imageStream.yml
+
+- name: VOTING APP RESULT | Manage Build Config
+  import_tasks: buildConfig.yml
+
+- name: VOTING APP RESULT | Manage DeploymentConfig
+  import_tasks: deploymentConfig.yml
